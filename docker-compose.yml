@@ -1,0 +1,157 @@
+version: "3"
+
+services:
+  private-api:
+    build: surfjudge-pyramid
+    image: surfjudge-pyramid
+    restart: unless-stopped
+    volumes:
+      - ./surfjudge-pyramid/app/surfjudge:/app/surfjudge:ro
+      - ./surfjudge-pyramid/app/data:/app/data
+    environment:
+      - WEBSOCKET_URL=wss://websocket.${DOMAIN}
+      - ZEROMQ_PORT=6545
+      - ZEROMQ_HOST=websockets
+    networks:
+      - traefik
+      - surfjudge
+      - default
+
+  public-api:
+    build: surfjudge-actix
+    image: surfjudge-actix
+    restart: unless-stopped
+    environment:
+      - APP_DATABASE__URL=postgresql://postgres:surfjudge2000@postgres:5432/postgres
+      - APP_SERVER_ADDRESS=0.0.0.0:8081
+      - APP_UI_SETTINGS__API_PATH=/public
+      - APP_UI_SETTINGS__WEBSOCKET_URL=wss://websocket.${DOMAIN}
+    volumes:
+      - ./surfjudge-actix/config:/app/config:ro
+      - ./surfjudge-actix/target/x86_64-unknown-linux-musl/release/surfjudge-actix:/app/surfjudge-actix:ro
+    networks:
+      - traefik
+      - surfjudge
+      - default
+
+  websockets:
+    image: surfjudge-pyramid
+    restart: unless-stopped
+    volumes:
+      - ./surfjudge-pyramid/app/surfjudge:/app/surfjudge
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik"
+      - "traefik.http.routers.websockets.rule=Host(`websocket.${DOMAIN}`)"
+      - "traefik.http.routers.websockets.entrypoints=websecure"
+      - "traefik.http.routers.websockets.tls.certresolver=le"
+      - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.routers.websockets.middlewares=sslheader@docker"
+        #- "traefik.http.services.websockets.loadbalancer.sticky.cookie=true"
+    command: python3 /app/surfjudge/websocket_server.py --websocket-port 80 --zeromq-port 6545
+    networks:
+      - traefik
+      - surfjudge
+      - default
+
+
+  private-nginx:
+    image: nginx:1.14.2
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./surfjudge-pyramid/nginx/nginx_traefik.conf:/etc/nginx/nginx.conf:ro
+      - ./surfjudge-pyramid/app/surfjudge/static:/surfjudge/static:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik"
+      - "traefik.http.routers.surfjudge-private.rule=Host(`judging.${DOMAIN}`)"
+      - "traefik.http.routers.surfjudge-private.tls.certresolver=le"
+      - "traefik.http.routers.surfjudge-private.entrypoints=websecure"
+    networks:
+      - traefik
+      - surfjudge
+      - default
+
+  public-nginx:
+    image: nginx:1.14.2
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    volumes:
+      - ./surfjudge-actix/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./surfjudge-vue-frontend/dist/static:/www/data/static:ro
+      - ./surfjudge-vue-frontend/dist/index.html:/www/data/index.html:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik"
+      - "traefik.http.routers.surfjudge-public.rule=Host(`www.${DOMAIN}`) || Host(`${DOMAIN}`)"
+      - "traefik.http.routers.surfjudge-public.tls.certresolver=le"
+      - "traefik.http.routers.surfjudge-public.entrypoints=websecure"
+      - "traefik.http.routers.surfjudge-public.middlewares=redirecttowww@docker"
+      - "traefik.http.middlewares.redirecttowww.redirectregex.regex=^https://${DOMAIN}/(.*)"
+      - "traefik.http.middlewares.redirecttowww.redirectregex.replacement=https://www.${DOMAIN}/$${1}"
+    networks:
+      - traefik
+      - surfjudge
+      - default
+
+  postgres:
+    image: postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_PASSWORD=surfjudge2000
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - surfjudge
+      - default
+
+  pgadmin:
+    image: dpage/pgadmin4:4.18
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: dario.goetz@googlemail.com
+      PGADMIN_DEFAULT_PASSWORD: crie
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - "8000:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    links:
+      - "postgres:postgres"
+
+  traefik:
+    image: traefik:v2.2
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./letsencrypt:/letsencrypt"
+    command:
+      #- "--log.level=DEBUG"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entryPoint.permanent=true"
+      - "--certificatesresolvers.le.acme.httpchallenge=true"
+      - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.le.acme.email=dario.goetz@googlemail.com"
+      - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
+    networks:
+      - traefik
+
+volumes:
+  pgdata:
+  pgadmin-data:
+
+networks:
+  traefik:
+    external: true
+  surfjudge:
+    external: true
