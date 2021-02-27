@@ -59,7 +59,7 @@ services:
     image: nginx:1.14.2
     restart: unless-stopped
     ports:
-      - "8080:80"
+      - "8082:80"
     volumes:
       - ./surfjudge-pyramid/nginx/nginx_traefik.conf:/etc/nginx/nginx.conf:ro
       - ./surfjudge-pyramid/app/surfjudge/static:/surfjudge/static:ro
