@@ -3,7 +3,7 @@ version: "3"
 services:
   private-api:
     build: surfjudge-pyramid
-    image: surfjudge-pyramid
+    image: surfjudge-private
     restart: unless-stopped
     volumes:
       - ./surfjudge-pyramid/app/surfjudge:/app/surfjudge:ro
@@ -19,7 +19,7 @@ services:
 
   public-api:
     build: surfjudge-actix
-    image: surfjudge-actix
+    image: surfjudge-public
     restart: unless-stopped
     environment:
       - APP_DATABASE__URL=postgresql://postgres:surfjudge2000@postgres:5432/postgres
