@@ -35,7 +35,7 @@ services:
       - default
 
   websockets:
-    image: surfjudge-pyramid
+    image: surfjudge-private
     restart: unless-stopped
     volumes:
       - ./surfjudge-pyramid/app/surfjudge:/app/surfjudge
