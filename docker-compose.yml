@@ -42,7 +42,7 @@ services:
       - "traefik.http.services.websockets.loadbalancer.server.port=6544"
         #- "traefik.http.services.websockets.loadbalancer.sticky.cookie=true"
     environment:
-      RUST_LOG: DEBUG
+      RUST_LOG: INFO
       WEBSOCKETS_HOST: 0.0.0.0
       WEBSOCKETS_PORT: 6544
       ZMQ_PORT: 6545
