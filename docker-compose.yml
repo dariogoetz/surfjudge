@@ -44,6 +44,7 @@ services:
       - "traefik.http.routers.websockets.tls.certresolver=le"
       - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
       - "traefik.http.routers.websockets.middlewares=sslheader@docker"
+      - "traefik.http.services.websockets.loadbalancer.server.port=6544"
         #- "traefik.http.services.websockets.loadbalancer.sticky.cookie=true"
     environment:
       RUST_LOG: DEBUG
