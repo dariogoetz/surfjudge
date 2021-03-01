@@ -13,8 +13,6 @@ services:
       - ZEROMQ_PORT=6545
       - ZEROMQ_HOST=websockets
     networks:
-      - traefik
-      - surfjudge
       - default
 
   public-api:
@@ -28,8 +26,6 @@ services:
       - APP_UI_SETTINGS__API_PATH=/public
       - APP_UI_SETTINGS__WEBSOCKET_URL=wss://websocket.${DOMAIN}
     networks:
-      - traefik
-      - surfjudge
       - default
 
   websockets:
@@ -38,7 +34,6 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=traefik"
       - "traefik.http.routers.websockets.rule=Host(`websocket.${DOMAIN}`)"
       - "traefik.http.routers.websockets.entrypoints=websecure"
       - "traefik.http.routers.websockets.tls.certresolver=le"
@@ -52,8 +47,6 @@ services:
       WEBSOCKETS_PORT: 6544
       ZMQ_PORT: 6545
     networks:
-      - traefik
-      - surfjudge
       - default
 
 
@@ -67,13 +60,10 @@ services:
       - ./surfjudge-pyramid/app/surfjudge/static:/surfjudge/static:ro
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=traefik"
       - "traefik.http.routers.surfjudge-private.rule=Host(`judging.${DOMAIN}`)"
       - "traefik.http.routers.surfjudge-private.tls.certresolver=le"
       - "traefik.http.routers.surfjudge-private.entrypoints=websecure"
     networks:
-      - traefik
-      - surfjudge
       - default
 
   public-nginx:
@@ -87,7 +77,6 @@ services:
       - ./surfjudge-vue-frontend/dist/index.html:/www/data/index.html:ro
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=traefik"
       - "traefik.http.routers.surfjudge-public.rule=Host(`www.${DOMAIN}`) || Host(`${DOMAIN}`)"
       - "traefik.http.routers.surfjudge-public.tls.certresolver=le"
       - "traefik.http.routers.surfjudge-public.entrypoints=websecure"
@@ -95,8 +84,6 @@ services:
       - "traefik.http.middlewares.redirecttowww.redirectregex.regex=^https://${DOMAIN}/(.*)"
       - "traefik.http.middlewares.redirecttowww.redirectregex.replacement=https://www.${DOMAIN}/$${1}"
     networks:
-      - traefik
-      - surfjudge
       - default
 
   postgres:
@@ -107,7 +94,6 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
-      - surfjudge
       - default
 
   traefik:
@@ -132,13 +118,7 @@ services:
       - "--certificatesresolvers.le.acme.email=dario.goetz@googlemail.com"
       - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
     networks:
-      - traefik
+      - default
 
 volumes:
   pgdata:
-
-networks:
-  traefik:
-    external: true
-  surfjudge:
-    external: true
