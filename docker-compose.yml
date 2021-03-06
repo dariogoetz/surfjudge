@@ -9,7 +9,7 @@ services:
       - ./surfjudge-pyramid/app/surfjudge:/app/surfjudge:ro
       - ./surfjudge-pyramid/app/data:/app/data
     environment:
-      - WEBSOCKET_URL=wss://websocket.${DOMAIN}
+      - WEBSOCKET_URL=$WEBSOCKET_URL
       - ZEROMQ_PORT=6545
       - ZEROMQ_HOST=websockets
     networks:
@@ -24,7 +24,7 @@ services:
       - APP_DATABASE__MAX_CONNECTIONS=40
       - APP_SERVER_ADDRESS=0.0.0.0:8081
       - APP_UI_SETTINGS__API_PATH=/public
-      - APP_UI_SETTINGS__WEBSOCKET_URL=wss://websocket.${DOMAIN}
+      - APP_UI_SETTINGS__WEBSOCKET_URL=$WEBSOCKET_URL
     networks:
       - default
 
@@ -32,9 +32,11 @@ services:
     build: surfjudge-rust-websocket-server
     image: surfjudge-rust-websocket
     restart: unless-stopped
+    ports:
+      - 6544:6544
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.websockets.rule=Host(`websocket.${DOMAIN}`)"
+      - "traefik.http.routers.websockets.rule=Host(`${WEBSOCKET_URL}`)"
       - "traefik.http.routers.websockets.entrypoints=websecure"
       - "traefik.http.routers.websockets.tls.certresolver=le"
       - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
