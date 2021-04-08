@@ -21,10 +21,26 @@ services:
     restart: unless-stopped
     environment:
       - APP_DATABASE__URL=postgresql://postgres:surfjudge2000@postgres:5432/postgres
-      - APP_DATABASE__MAX_CONNECTIONS=40
-      - APP_SERVER_ADDRESS=0.0.0.0:8081
-      - APP_UI_SETTINGS__API_PATH=/public
-      - APP_UI_SETTINGS__WEBSOCKET_URL=$WEBSOCKET_URL
+      - APP_DATABASE__MAX_CONNECTIONS=20
+      - APP_SERVER_ADDRESS=0.0.0.0:8080
+      - APP_API__PUBLIC_PATH=/public
+      - APP_API__WEBSOCKET_URL=$WEBSOCKET_URL
+    networks:
+      - default
+  
+  judging-api:
+    build: surfjudge-actix
+    image: surfjudge-public
+    restart: unless-stopped
+    environment:
+      - APP_DATABASE__URL=postgresql://postgres:surfjudge2000@postgres:5432/postgres
+      - APP_DATABASE__MAX_CONNECTIONS=5
+      - APP_SERVER_ADDRESS=0.0.0.0:8080
+      - APP_API__PUBLIC_PATH=/public
+      - APP_API__AUTH_PATH=/auth
+      - APP_API__JUDGING_PATH=/judging
+      - APP_API__WEBSOCKET_URL=$WEBSOCKET_URL
+      - APP_NOTIFICATIONS__ZMQ_SENDER_ADDRESS=websockets:6545
     networks:
       - default
 
@@ -62,7 +78,7 @@ services:
       - ./surfjudge-pyramid/app/surfjudge/static:/surfjudge/static:ro
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.surfjudge-private.rule=Host(`judging.${DOMAIN}`)"
+      - "traefik.http.routers.surfjudge-private.rule=Host(`admin.${DOMAIN}`)"
       - "traefik.http.routers.surfjudge-private.tls.certresolver=le"
       - "traefik.http.routers.surfjudge-private.entrypoints=websecure"
     networks:
@@ -87,6 +103,25 @@ services:
       - "traefik.http.middlewares.redirecttowww.redirectregex.replacement=https://www.${DOMAIN}/$${1}"
     networks:
       - default
+
+  judging-nginx:
+    image: nginx:1.14.2
+    restart: unless-stopped
+    ports:
+      - "8083:80"
+    volumes:
+      - ./surfjudge-actix/nginx/nginx-judging.conf:/etc/nginx/nginx.conf:ro
+      - ./surfjudge-vue-frontend/dist/static:/www/data/static:ro
+      - ./surfjudge-vue-frontend/dist/index-judging.html:/www/data/index.html:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.surfjudge-public.rule=Host(`judging.${DOMAIN}`))"
+      - "traefik.http.routers.surfjudge-public.tls.certresolver=le"
+      - "traefik.http.routers.surfjudge-public.entrypoints=websecure"
+      - "traefik.http.routers.surfjudge-public.middlewares=redirecttowww@docker"
+    networks:
+      - default
+
 
   postgres:
     image: postgres
