@@ -5,6 +5,8 @@ services:
     build: surfjudge-pyramid
     image: surfjudge-private
     restart: unless-stopped
+    # ports:
+    #   - "8082:80"
     volumes:
       - ./surfjudge-pyramid/app/surfjudge:/app/surfjudge:ro
       - ./surfjudge-pyramid/app/data:/app/data
@@ -19,6 +21,8 @@ services:
     build: surfjudge-actix
     image: surfjudge-public
     restart: unless-stopped
+    # ports:
+    #   - "8081:8080"
     volumes:
       - ./surfjudge-vue-frontend/dist/static:/usr/src/app/static:ro
       - ./surfjudge-vue-frontend/dist/index.html:/usr/src/app/templates/index.html:ro
@@ -35,6 +39,8 @@ services:
     build: surfjudge-actix
     image: surfjudge-public
     restart: unless-stopped
+    # ports:
+    #   - "8083:8080"
     volumes:
       - ./surfjudge-vue-frontend/dist/static:/usr/src/app/static:ro
       - ./surfjudge-vue-frontend/dist/index-judging.html:/usr/src/app/templates/index.html:ro
