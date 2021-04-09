@@ -9,9 +9,9 @@ services:
       - ./surfjudge-pyramid/app/surfjudge:/app/surfjudge:ro
       - ./surfjudge-pyramid/app/data:/app/data
     environment:
-      - WEBSOCKET_URL=$WEBSOCKET_URL
-      - ZEROMQ_PORT=6545
-      - ZEROMQ_HOST=websockets
+      WEBSOCKET_URL: $WEBSOCKET_URL
+      ZEROMQ_PORT: 6545
+      ZEROMQ_HOST: websockets
     networks:
       - default
 
@@ -23,14 +23,14 @@ services:
       - ./surfjudge-vue-frontend/dist/static:/usr/src/app/static:ro
       - ./surfjudge-vue-frontend/dist/index.html:/usr/src/app/templates/index.html:ro
     environment:
-      - APP_DATABASE__URL=postgresql://postgres:surfjudge2000@postgres:5432/postgres
-      - APP_DATABASE__MAX_CONNECTIONS=20
-      - APP_SERVER_ADDRESS=0.0.0.0:8080
-      - APP_API__PUBLIC_PATH=/public
-      - APP_API__WEBSOCKET_URL=$WEBSOCKET_URL
+      APP_DATABASE__URL: postgresql://postgres:surfjudge2000@postgres:5432/postgres
+      APP_DATABASE__MAX_CONNECTIONS: 20
+      APP_SERVER_ADDRESS: 0.0.0.0:8080
+      APP_API__PUBLIC_PATH: /public
+      APP_API__WEBSOCKET_URL: $WEBSOCKET_URL
     networks:
       - default
-  
+
   judging-api:
     build: surfjudge-actix
     image: surfjudge-public
@@ -39,14 +39,14 @@ services:
       - ./surfjudge-vue-frontend/dist/static:/usr/src/app/static:ro
       - ./surfjudge-vue-frontend/dist/index-judging.html:/usr/src/app/templates/index.html:ro
     environment:
-      - APP_DATABASE__URL=postgresql://postgres:surfjudge2000@postgres:5432/postgres
-      - APP_DATABASE__MAX_CONNECTIONS=5
-      - APP_SERVER_ADDRESS=0.0.0.0:8080
-      - APP_API__PUBLIC_PATH=/public
-      - APP_API__AUTH_PATH=/auth
-      - APP_API__JUDGING_PATH=/judging
-      - APP_API__WEBSOCKET_URL=$WEBSOCKET_URL
-      - APP_NOTIFICATIONS__ZMQ_SENDER_ADDRESS=websockets:6545
+      APP_DATABASE__URL: postgresql://postgres:surfjudge2000@postgres:5432/postgres
+      APP_DATABASE__MAX_CONNECTIONS: 5
+      APP_SERVER_ADDRESS: 0.0.0.0:8080
+      APP_API__PUBLIC_PATH: /public
+      APP_API__AUTH_PATH: /auth
+      APP_API__JUDGING_PATH: /judging
+      APP_API__WEBSOCKET_URL: $WEBSOCKET_URL
+      APP_NOTIFICATIONS__ZMQ_SENDER_ADDRESS: websockets:6545
     networks:
       - default
 
@@ -64,7 +64,6 @@ services:
       - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
       - "traefik.http.routers.websockets.middlewares=sslheader@docker"
       - "traefik.http.services.websockets.loadbalancer.server.port=6544"
-        #- "traefik.http.services.websockets.loadbalancer.sticky.cookie=true"
     environment:
       RUST_LOG: INFO
       WEBSOCKETS_HOST: 0.0.0.0
@@ -98,6 +97,7 @@ services:
     volumes:
       - ./surfjudge-actix/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./surfjudge-vue-frontend/dist/static:/www/data/static:ro
+      - ./surfjudge-vue-frontend/dist/index.html:/www/data/index.html:ro
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.surfjudge-public.rule=Host(`www.${DOMAIN}`) || Host(`${DOMAIN}`)"
@@ -134,7 +134,7 @@ services:
     ports:
       - 5432:5432
     environment:
-      - POSTGRES_PASSWORD=surfjudge2000
+      POSTGRES_PASSWORD: surfjudge2000
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
