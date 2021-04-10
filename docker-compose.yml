@@ -49,7 +49,6 @@ services:
       - default
 
   judging-api:
-    build: surfjudge-actix
     image: surfjudge-public
     restart: unless-stopped
     # ports:
