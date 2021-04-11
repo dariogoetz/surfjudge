@@ -147,7 +147,6 @@ services:
   #     - "traefik.http.routers.surfjudge-judging.rule=Host(`judging.${DOMAIN}`))"
   #     - "traefik.http.routers.surfjudge-judging.tls.certresolver=le"
   #     - "traefik.http.routers.surfjudge-judging.entrypoints=websecure"
-  #     - "traefik.http.routers.surfjudge-judging.middlewares=redirecttowww@docker"
   #   networks:
   #     - default
 
