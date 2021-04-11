@@ -68,7 +68,7 @@ services:
       APP_NOTIFICATIONS__ZMQ_SENDER_ADDRESS: websockets:6545
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.surfjudge-judging.rule=Host(`judging.${DOMAIN}`))"
+      - "traefik.http.routers.surfjudge-judging.rule=Host(`judging.${DOMAIN}`)"
       - "traefik.http.routers.surfjudge-judging.tls.certresolver=le"
       - "traefik.http.routers.surfjudge-judging.entrypoints=websecure"
     networks:
@@ -144,7 +144,7 @@ services:
   #     - ./surfjudge-vue-frontend/dist/index-judging.html:/www/data/index.html:ro
   #   labels:
   #     - "traefik.enable=true"
-  #     - "traefik.http.routers.surfjudge-judging.rule=Host(`judging.${DOMAIN}`))"
+  #     - "traefik.http.routers.surfjudge-judging.rule=Host(`judging.${DOMAIN}`)"
   #     - "traefik.http.routers.surfjudge-judging.tls.certresolver=le"
   #     - "traefik.http.routers.surfjudge-judging.entrypoints=websecure"
   #   networks:
