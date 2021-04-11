@@ -82,7 +82,7 @@ services:
       - 6544:6544
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.websockets.rule=Host(`${WEBSOCKET_URL}`)"
+      - "traefik.http.routers.websockets.rule=Host(`websocket.${DOMAIN}`)"
       - "traefik.http.routers.websockets.entrypoints=websecure"
       - "traefik.http.routers.websockets.tls.certresolver=le"
       - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
