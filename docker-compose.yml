@@ -5,8 +5,8 @@ services:
     build: surfjudge-pyramid
     image: surfjudge-private
     restart: unless-stopped
-    # ports:
-    #   - "8082:80"
+    ports:
+      - "8082:80"
     volumes:
       - ./surfjudge-pyramid/app/surfjudge:/app/surfjudge:ro
       - ./surfjudge-pyramid/app/data:/app/data
@@ -14,11 +14,11 @@ services:
       WEBSOCKET_URL: $WEBSOCKET_URL
       ZEROMQ_PORT: 6545
       ZEROMQ_HOST: websockets
-    # labels:
-    #   - "traefik.enable=true"
-    #   - "traefik.http.routers.surfjudge-private.rule=Host(`admin.${DOMAIN}`)"
-    #   - "traefik.http.routers.surfjudge-private.tls.certresolver=le"
-    #   - "traefik.http.routers.surfjudge-private.entrypoints=websecure"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.surfjudge-private.rule=Host(`admin.${DOMAIN}`)"
+      - "traefik.http.routers.surfjudge-private.tls.certresolver=le"
+      - "traefik.http.routers.surfjudge-private.entrypoints=websecure"
     networks:
       - default
 
@@ -26,8 +26,8 @@ services:
     build: surfjudge-actix
     image: surfjudge-public
     restart: unless-stopped
-    # ports:
-    #   - "8081:8080"
+    ports:
+      - "8081:8080"
     volumes:
       - ./surfjudge-vue-frontend/dist/static:/usr/src/app/static:ro
       - ./surfjudge-vue-frontend/dist/index.html:/usr/src/app/templates/index.html:ro
@@ -37,22 +37,22 @@ services:
       APP_SERVER_ADDRESS: 0.0.0.0:8080
       APP_API__PUBLIC_PATH: /public
       APP_API__WEBSOCKET_URL: $WEBSOCKET_URL
-    # labels:
-    #   - "traefik.enable=true"
-    #   - "traefik.http.routers.surfjudge-public.rule=Host(`www.${DOMAIN}`) || Host(`${DOMAIN}`)"
-    #   - "traefik.http.routers.surfjudge-public.tls.certresolver=le"
-    #   - "traefik.http.routers.surfjudge-public.entrypoints=websecure"
-    #   - "traefik.http.routers.surfjudge-public.middlewares=redirecttowww@docker"
-    #   - "traefik.http.middlewares.redirecttowww.redirectregex.regex=^https://${DOMAIN}/(.*)"
-    #   - "traefik.http.middlewares.redirecttowww.redirectregex.replacement=https://www.${DOMAIN}/$${1}"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.surfjudge-public.rule=Host(`www.${DOMAIN}`) || Host(`${DOMAIN}`)"
+      - "traefik.http.routers.surfjudge-public.tls.certresolver=le"
+      - "traefik.http.routers.surfjudge-public.entrypoints=websecure"
+      - "traefik.http.routers.surfjudge-public.middlewares=redirecttowww@docker"
+      - "traefik.http.middlewares.redirecttowww.redirectregex.regex=^https://${DOMAIN}/(.*)"
+      - "traefik.http.middlewares.redirecttowww.redirectregex.replacement=https://www.${DOMAIN}/$${1}"
     networks:
       - default
 
   judging-api:
     image: surfjudge-public
     restart: unless-stopped
-    # ports:
-    #   - "8083:8080"
+    ports:
+      - "8083:8080"
     volumes:
       - ./surfjudge-vue-frontend/dist/static:/usr/src/app/static:ro
       - ./surfjudge-vue-frontend/dist/index-judging.html:/usr/src/app/templates/index.html:ro
@@ -65,11 +65,11 @@ services:
       APP_API__JUDGING_PATH: /judging
       APP_API__WEBSOCKET_URL: $WEBSOCKET_URL
       APP_NOTIFICATIONS__ZMQ_SENDER_ADDRESS: websockets:6545
-    # labels:
-    #   - "traefik.enable=true"
-    #   - "traefik.http.routers.surfjudge-public.rule=Host(`judging.${DOMAIN}`))"
-    #   - "traefik.http.routers.surfjudge-public.tls.certresolver=le"
-    #   - "traefik.http.routers.surfjudge-public.entrypoints=websecure"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.surfjudge-public.rule=Host(`judging.${DOMAIN}`))"
+      - "traefik.http.routers.surfjudge-public.tls.certresolver=le"
+      - "traefik.http.routers.surfjudge-public.entrypoints=websecure"
     networks:
       - default
 
@@ -96,59 +96,59 @@ services:
       - default
 
 
-  private-nginx:
-    image: nginx:1.14.2
-    restart: unless-stopped
-    ports:
-      - "8082:80"
-    volumes:
-      - ./surfjudge-pyramid/nginx/nginx_traefik.conf:/etc/nginx/nginx.conf:ro
-      - ./surfjudge-pyramid/app/surfjudge/static:/surfjudge/static:ro
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.surfjudge-private.rule=Host(`admin.${DOMAIN}`)"
-      - "traefik.http.routers.surfjudge-private.tls.certresolver=le"
-      - "traefik.http.routers.surfjudge-private.entrypoints=websecure"
-    networks:
-      - default
+  # private-nginx:
+  #   image: nginx:1.14.2
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8082:80"
+  #   volumes:
+  #     - ./surfjudge-pyramid/nginx/nginx_traefik.conf:/etc/nginx/nginx.conf:ro
+  #     - ./surfjudge-pyramid/app/surfjudge/static:/surfjudge/static:ro
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.surfjudge-private.rule=Host(`admin.${DOMAIN}`)"
+  #     - "traefik.http.routers.surfjudge-private.tls.certresolver=le"
+  #     - "traefik.http.routers.surfjudge-private.entrypoints=websecure"
+  #   networks:
+  #     - default
 
-  public-nginx:
-    image: nginx:1.14.2
-    restart: unless-stopped
-    ports:
-      - "8081:80"
-    volumes:
-      - ./surfjudge-actix/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./surfjudge-vue-frontend/dist/static:/www/data/static:ro
-      - ./surfjudge-vue-frontend/dist/index.html:/www/data/index.html:ro
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.surfjudge-public.rule=Host(`www.${DOMAIN}`) || Host(`${DOMAIN}`)"
-      - "traefik.http.routers.surfjudge-public.tls.certresolver=le"
-      - "traefik.http.routers.surfjudge-public.entrypoints=websecure"
-      - "traefik.http.routers.surfjudge-public.middlewares=redirecttowww@docker"
-      - "traefik.http.middlewares.redirecttowww.redirectregex.regex=^https://${DOMAIN}/(.*)"
-      - "traefik.http.middlewares.redirecttowww.redirectregex.replacement=https://www.${DOMAIN}/$${1}"
-    networks:
-      - default
+  # public-nginx:
+  #   image: nginx:1.14.2
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8081:80"
+  #   volumes:
+  #     - ./surfjudge-actix/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./surfjudge-vue-frontend/dist/static:/www/data/static:ro
+  #     - ./surfjudge-vue-frontend/dist/index.html:/www/data/index.html:ro
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.surfjudge-public.rule=Host(`www.${DOMAIN}`) || Host(`${DOMAIN}`)"
+  #     - "traefik.http.routers.surfjudge-public.tls.certresolver=le"
+  #     - "traefik.http.routers.surfjudge-public.entrypoints=websecure"
+  #     - "traefik.http.routers.surfjudge-public.middlewares=redirecttowww@docker"
+  #     - "traefik.http.middlewares.redirecttowww.redirectregex.regex=^https://${DOMAIN}/(.*)"
+  #     - "traefik.http.middlewares.redirecttowww.redirectregex.replacement=https://www.${DOMAIN}/$${1}"
+  #   networks:
+  #     - default
 
-  judging-nginx:
-    image: nginx:1.14.2
-    restart: unless-stopped
-    ports:
-      - "8083:80"
-    volumes:
-      - ./surfjudge-actix/nginx/nginx-judging.conf:/etc/nginx/nginx.conf:ro
-      - ./surfjudge-vue-frontend/dist/static:/www/data/static:ro
-      - ./surfjudge-vue-frontend/dist/index-judging.html:/www/data/index.html:ro
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.surfjudge-public.rule=Host(`judging.${DOMAIN}`))"
-      - "traefik.http.routers.surfjudge-public.tls.certresolver=le"
-      - "traefik.http.routers.surfjudge-public.entrypoints=websecure"
-      - "traefik.http.routers.surfjudge-public.middlewares=redirecttowww@docker"
-    networks:
-      - default
+  # judging-nginx:
+  #   image: nginx:1.14.2
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8083:80"
+  #   volumes:
+  #     - ./surfjudge-actix/nginx/nginx-judging.conf:/etc/nginx/nginx.conf:ro
+  #     - ./surfjudge-vue-frontend/dist/static:/www/data/static:ro
+  #     - ./surfjudge-vue-frontend/dist/index-judging.html:/www/data/index.html:ro
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.surfjudge-public.rule=Host(`judging.${DOMAIN}`))"
+  #     - "traefik.http.routers.surfjudge-public.tls.certresolver=le"
+  #     - "traefik.http.routers.surfjudge-public.entrypoints=websecure"
+  #     - "traefik.http.routers.surfjudge-public.middlewares=redirecttowww@docker"
+  #   networks:
+  #     - default
 
 
   postgres:
