@@ -25,6 +25,7 @@ services:
       - "traefik.http.routers.surfjudge-public.middlewares=redirecttowww@docker"
       - "traefik.http.middlewares.redirecttowww.redirectregex.regex=^https://${DOMAIN}/(.*)"
       - "traefik.http.middlewares.redirecttowww.redirectregex.replacement=https://www.${DOMAIN}/$${1}"
+      - "traefik.http.services.surfjudge-public.loadbalancer.server.port=8080"
     networks:
       - default
 
@@ -71,6 +72,7 @@ services:
       - "traefik.http.routers.surfjudge-judging.rule=Host(`judging.${DOMAIN}`)"
       - "traefik.http.routers.surfjudge-judging.tls.certresolver=le"
       - "traefik.http.routers.surfjudge-judging.entrypoints=websecure"
+      - "traefik.http.services.surfjudge-judging.loadbalancer.server.port=8080"
     networks:
       - default
 
