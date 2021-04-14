@@ -1,4 +1,7 @@
-version: "3"
+version: "3.4"
+
+x-common-variables: &common-variables
+  DATABASE__URL: postgresql://postgres:surfjudge2000@postgres:5432/postgres
 
 services:
 
@@ -12,12 +15,12 @@ services:
       - ./surfjudge-vue-frontend/dist/static:/usr/src/app/static:ro
       - ./surfjudge-vue-frontend/dist/index.html:/usr/src/app/templates/index.html:ro
     environment:
-      APP_DATABASE__URL: postgresql://postgres:surfjudge2000@postgres:5432/postgres
-      APP_DATABASE__MAX_CONNECTIONS: 20
-      APP_SERVER_ADDRESS: 0.0.0.0:8080
-      APP_API__PUBLIC_PATH: /public
-      APP_API__WEBSOCKET_URL: $WEBSOCKET_URL
-      APP_CORS_ORIGINS: https://${DOMAIN}, https://www.${DOMAIN}
+      <<: *common-variables
+      DATABASE__MAX_CONNECTIONS: 20
+      SERVER_ADDRESS: 0.0.0.0:8080
+      API__PUBLIC_PATH: /public
+      API__WEBSOCKET_URL: $WEBSOCKET_URL
+      CORS_ORIGINS: https://${DOMAIN}, https://www.${DOMAIN}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.surfjudge-public.rule=Host(`www.${DOMAIN}`) || Host(`${DOMAIN}`)"
@@ -60,15 +63,15 @@ services:
       - ./surfjudge-vue-frontend/dist/static:/usr/src/app/static:ro
       - ./surfjudge-vue-frontend/dist/index-judging.html:/usr/src/app/templates/index.html:ro
     environment:
-      APP_DATABASE__URL: postgresql://postgres:surfjudge2000@postgres:5432/postgres
-      APP_DATABASE__MAX_CONNECTIONS: 5
-      APP_SERVER_ADDRESS: 0.0.0.0:8080
-      APP_API__PUBLIC_PATH: /public
-      APP_API__AUTH_PATH: /auth
-      APP_API__JUDGING_PATH: /judging
-      APP_API__WEBSOCKET_URL: $WEBSOCKET_URL
-      APP_NOTIFICATIONS__ZMQ_SENDER_ADDRESS: websockets:6545
-      APP_CORS_ORIGINS: https://judging.${DOMAIN}
+      <<: *common-variables
+      DATABASE__MAX_CONNECTIONS: 5
+      SERVER_ADDRESS: 0.0.0.0:8080
+      API__PUBLIC_PATH: /public
+      API__AUTH_PATH: /auth
+      API__JUDGING_PATH: /judging
+      API__WEBSOCKET_URL: $WEBSOCKET_URL
+      NOTIFICATIONS__ZMQ_SENDER_ADDRESS: websockets:6545
+      CORS_ORIGINS: https://judging.${DOMAIN}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.surfjudge-judging.rule=Host(`judging.${DOMAIN}`)"
