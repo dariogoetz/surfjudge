@@ -32,7 +32,7 @@ services:
 
   admin-api:
     build: surfjudge-pyramid
-    image: surfjudge-admin
+    image: surfjudge-pyramid
     restart: unless-stopped
     # ports:
     #   - "8082:80"
