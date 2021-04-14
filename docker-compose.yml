@@ -17,6 +17,7 @@ services:
       APP_SERVER_ADDRESS: 0.0.0.0:8080
       APP_API__PUBLIC_PATH: /public
       APP_API__WEBSOCKET_URL: $WEBSOCKET_URL
+      APP_CORS_ORIGINS: https://${DOMAIN}, https://www.${DOMAIN}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.surfjudge-public.rule=Host(`www.${DOMAIN}`) || Host(`${DOMAIN}`)"
@@ -67,6 +68,7 @@ services:
       APP_API__JUDGING_PATH: /judging
       APP_API__WEBSOCKET_URL: $WEBSOCKET_URL
       APP_NOTIFICATIONS__ZMQ_SENDER_ADDRESS: websockets:6545
+      APP_CORS_ORIGINS: https://judging.${DOMAIN}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.surfjudge-judging.rule=Host(`judging.${DOMAIN}`)"
