@@ -1,12 +1,12 @@
 [submodule "surfjudge-actix"]
 	path = surfjudge-actix
-	url = https://gitlab.pidario.nsupdate.info/dario/surfjudge-actix.git
+	url = https://gitlab.pidario.de/dario/surfjudge-actix.git
 [submodule "surfjudge-pyramid"]
 	path = surfjudge-pyramid
-	url = https://gitlab.pidario.nsupdate.info/dario/surfjudge-pyramid.git
+	url = https://gitlab.pidario.de/dario/surfjudge-pyramid.git
 [submodule "surfjudge-vue-frontend"]
 	path = surfjudge-vue-frontend
-	url = https://gitlab.pidario.nsupdate.info/dario/surfjudge-vue-frontend.git
+	url = https://gitlab.pidario.de/dario/surfjudge-vue-frontend.git
 [submodule "surfjudge-rust-websocket-server"]
 	path = surfjudge-rust-websocket-server
-	url = https://gitlab.pidario.nsupdate.info/surfjudge-dev/surfjudge-rust-websocket-server.git
+	url = https://gitlab.pidario.de/surfjudge-dev/surfjudge-rust-websocket-server.git
